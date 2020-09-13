@@ -1,3 +1,5 @@
+package ph.com.nightowlstudios;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -26,7 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 7/14/20
  */
 public abstract class MainVerticle extends AbstractVerticle {

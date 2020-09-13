@@ -1,4 +1,4 @@
-package entity;
+package ph.com.nightowlstudios.entity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package persistence;
+package ph.com.nightowlstudios.persistence;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -12,12 +12,12 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.query.Query;
+import ph.com.nightowlstudios.persistence.query.Query;
 
 import java.util.stream.Collector;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public class PersistenceClient {

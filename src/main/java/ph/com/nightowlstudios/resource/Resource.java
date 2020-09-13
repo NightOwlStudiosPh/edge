@@ -1,6 +1,6 @@
-package resource;
+package ph.com.nightowlstudios.resource;
 
-import auth.UserRole;
+import ph.com.nightowlstudios.auth.UserRole;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -14,10 +14,10 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.PersistenceClient;
+import ph.com.nightowlstudios.persistence.PersistenceClient;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public abstract class Resource {

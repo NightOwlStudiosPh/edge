@@ -1,7 +1,7 @@
-package persistence;
+package ph.com.nightowlstudios.persistence;
 
-import entity.Column;
-import entity.Entity;
+import ph.com.nightowlstudios.entity.Column;
+import ph.com.nightowlstudios.entity.Entity;
 import io.vavr.control.Try;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public class Collectors {

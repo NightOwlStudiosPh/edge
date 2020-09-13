@@ -1,8 +1,8 @@
-package persistence.query;
+package ph.com.nightowlstudios.persistence.query;
 
-import entity.Column;
-import entity.Entity;
-import entity.Table;
+import ph.com.nightowlstudios.entity.Column;
+import ph.com.nightowlstudios.entity.Entity;
+import ph.com.nightowlstudios.entity.Table;
 import io.vavr.control.Try;
 import io.vertx.sqlclient.Tuple;
 import org.apache.commons.lang3.StringUtils;
@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public class QueryBuilder {
 
     /**
-     * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+     * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
      * @since 7/8/20
      */
     private enum QueryType {

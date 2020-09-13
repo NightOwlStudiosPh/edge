@@ -1,6 +1,6 @@
-package utils;
+package ph.com.nightowlstudios.utils;
 
-import entity.Entity;
+import ph.com.nightowlstudios.entity.Entity;
 import io.vavr.control.Try;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public final class Utils {
@@ -36,9 +36,9 @@ public final class Utils {
      * @param <T> <code>Entity.class</code> object should conform to <code>Table.class</code> and
      *           <code>Column.class</code>
      * @return the resulting <code>Entity</code> object.
-     * @see entity.Entity
-     * @see entity.Table
-     * @see entity.Column
+     * @see ph.com.nightowlstudios.entity.Entity
+     * @see ph.com.nightowlstudios.entity.Table
+     * @see ph.com.nightowlstudios.entity.Column
      */
     public static <T extends Entity> T merge(T from, T to) {
         T result = Json.decodeValue(new JsonObject().encode(), (Class<T>) from.getClass());

@@ -1,12 +1,12 @@
-package persistence.query;
+package ph.com.nightowlstudios.persistence.query;
 
-import entity.Entity;
+import ph.com.nightowlstudios.entity.Entity;
 import io.vertx.sqlclient.Tuple;
 
 import java.util.UUID;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public interface Query {

@@ -1,4 +1,4 @@
-package resource;
+package ph.com.nightowlstudios.resource;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@{yev}</i></a>
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 7/6/20
  */
 public final class Validators {

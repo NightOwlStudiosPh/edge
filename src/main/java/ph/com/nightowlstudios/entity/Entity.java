@@ -1,4 +1,4 @@
-package entity;
+package ph.com.nightowlstudios.entity;
 
 /**
  * This just serves as a tagging type for Persistence Entities.
