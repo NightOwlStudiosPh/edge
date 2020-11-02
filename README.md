@@ -10,3 +10,9 @@ A simple library for building REST API using Vertx.
 - [Vert.x Gitter](https://gitter.im/eclipse-vertx/vertx-users)
 - [Vertx. Maven Plugin Documentation](https://reactiverse.io/vertx-maven-plugin/#using-the-plugin)
 
+## Deploy
+Update version, then do:
+```
+mvn clean deploy
+mvn nexus-staging:release
+```

@@ -31,37 +31,66 @@ import java.util.Set;
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 7/14/20
  */
-public abstract class MainVerticle extends AbstractVerticle {
+public abstract class ApplicationVerticle<T extends ApplicationConfig> extends AbstractVerticle {
+
+    private final ApplicationConfig appConfig;
+
+    protected ApplicationVerticle (ApplicationConfig appConfig) {
+        this.appConfig = appConfig;
+    }
 
     @Override
     public void start(Promise<Void> startPromise) {
         Router rootRouter = Router.router(vertx);
+        onRootRouterCreate(rootRouter);
         rootRouter.route().handler(
                 CorsHandler
-                        .create(getAllowedOrigins())
-                        .allowCredentials(true)
-                        .allowedMethods(ALLOWED_METHODS)
-                        .allowedHeaders(ALLOWED_HEADERS)
-                        .exposedHeaders(EXPOSED_HEADERS)
+                        .create(appConfig.getAllowedOrigins())
+                        .allowCredentials(allowCORSCredentials())
+                        .allowedMethods(getAllowedMethods())
+                        .allowedHeaders(getAllowedHeaders())
+                        .exposedHeaders(getExposedHeaders())
         );
-
         rootRouter.route().handler(BodyHandler.create());
-
-        rootRouter.mountSubRouter(getApiPrefix(), buildApiRouter());
+        rootRouter.mountSubRouter(appConfig.getApiPrefix(), buildApiRouter());
 
         createHttpServer()
                 .requestHandler(rootRouter)
-                .listen(getPort(), http -> {
+                .listen(appConfig.getPort(), http -> {
                     if (http.succeeded()) {
                         startPromise.complete();
-                        log.info(getBannerText());
-                        log.info("{} online at PORT: {}", getName(), http.result().actualPort());
+                        log.info(appConfig.getBannerText());
+                        log.info("{} online at PORT: {}", appConfig.getApplicationName(), http.result().actualPort());
+                        onServerDeployed(http.result());
                         return;
                     }
                     log.error("Error running server: " + http.cause());
                     startPromise.fail(http.cause());
+                    onServerDeployFail(http.cause());
                 });
     }
+
+    /**
+     * Called immediately after Router creation.
+     *
+     * @param router the root router
+     */
+    protected void onRootRouterCreate(Router router){}
+
+    /**
+     * Called before mounting API subrouter.
+     *
+     * @param router api subrouter
+     */
+    protected void beforeAPIRouterMount(Router router){}
+
+    protected void onServerDeployed(HttpServer httpServer){}
+    protected void onServerDeployFail(Throwable error){}
+
+    protected boolean allowCORSCredentials() { return true; }
+    protected Set<HttpMethod> getAllowedMethods() { return  ALLOWED_METHODS; }
+    protected Set<String> getAllowedHeaders() { return ALLOWED_HEADERS; }
+    protected Set<String> getExposedHeaders() { return EXPOSED_HEADERS; }
 
     protected Handler<RoutingContext> createRouteLogHandler() {
         return LoggerHandler.create();
@@ -70,25 +99,18 @@ public abstract class MainVerticle extends AbstractVerticle {
         return ErrorHandler.create();
     }
 
-    protected abstract String getName();
-    protected abstract int getPort();
-    protected abstract String getAllowedOrigins();
-    protected abstract String getApiPrefix();
-    protected abstract String getBannerText();
-    protected abstract boolean isProduction();
-    protected abstract JsonObject getSSLConfig();
     protected abstract JWTAuth createAuthProvider();
     protected abstract Class<?>[] getResourceClasses();
 
     private HttpServer createHttpServer() {
-        if (isProduction()) {
+        if (appConfig.isProduction()) {
             return vertx.createHttpServer(createSSLHttpOptions());
         }
         return vertx.createHttpServer();
     }
 
     private HttpServerOptions createSSLHttpOptions () {
-        JsonObject ssl = config().getJsonObject("ssl");
+        JsonObject ssl = appConfig.getSSLConfig();
 
         HttpServerOptions options = new HttpServerOptions()
                 .setUseAlpn(false)
@@ -124,6 +146,7 @@ public abstract class MainVerticle extends AbstractVerticle {
 
     private Router buildApiRouter() throws RuntimeException {
         Router router = Router.router(vertx);
+        beforeAPIRouterMount(router);
         router.route().handler(createRouteLogHandler());
         router.route().failureHandler(createRouteFailureHandler());
 
@@ -141,7 +164,7 @@ public abstract class MainVerticle extends AbstractVerticle {
         return router;
     }
 
-    private static final Logger log = LoggerFactory.getLogger(MainVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationVerticle.class);
 
     private static final Set<HttpMethod> ALLOWED_METHODS = new HashSet<>(
             Arrays.asList(
@@ -166,4 +189,16 @@ public abstract class MainVerticle extends AbstractVerticle {
     );
 
     private static final Set<String> EXPOSED_HEADERS = new HashSet<>(Collections.singletonList(HttpHeaders.AUTHORIZATION.toString()));
+
+    static final String BANNER_TXT =
+            "▓█████ ▓█████▄   ▄████ ▓█████    \n" +
+            "▓█   ▀ ▒██▀ ██▌ ██▒ ▀█▒▓█   ▀    \n" +
+            "▒███   ░██   █▌▒██░▄▄▄░▒███      \n" +
+            "▒▓█  ▄ ░▓█▄   ▌░▓█  ██▓▒▓█  ▄    \n" +
+            "░▒████▒░▒████▓ ░▒▓███▀▒░▒████▒   \n" +
+            "░░ ▒░ ░ ▒▒▓  ▒  ░▒   ▒ ░░ ▒░ ░   \n" +
+            " ░ ░  ░ ░ ▒  ▒   ░   ░  ░ ░  ░   \n" +
+            "   ░    ░ ░  ░ ░ ░   ░    ░      \n" +
+            "   ░  ░   ░          ░    ░  ░   \n" +
+            "        ░                        \n";
 }
