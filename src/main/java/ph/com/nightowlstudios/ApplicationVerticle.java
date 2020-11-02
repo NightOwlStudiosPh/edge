@@ -33,9 +33,9 @@ import java.util.Set;
  */
 public abstract class ApplicationVerticle<T extends ApplicationConfig> extends AbstractVerticle {
 
-    private final ApplicationConfig appConfig;
+    private final T appConfig;
 
-    protected ApplicationVerticle (ApplicationConfig appConfig) {
+    protected ApplicationVerticle (T appConfig) {
         this.appConfig = appConfig;
     }
 
@@ -69,6 +69,8 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                     onServerDeployFail(http.cause());
                 });
     }
+
+    protected T getAppConfig() { return this.appConfig; }
 
     /**
      * Called immediately after Router creation.
@@ -190,7 +192,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
 
     private static final Set<String> EXPOSED_HEADERS = new HashSet<>(Collections.singletonList(HttpHeaders.AUTHORIZATION.toString()));
 
-    static final String BANNER_TXT =
+    static final String BANNER_TXT = "\n" +
             "▓█████ ▓█████▄   ▄████ ▓█████    \n" +
             "▓█   ▀ ▒██▀ ██▌ ██▒ ▀█▒▓█   ▀    \n" +
             "▒███   ░██   █▌▒██░▄▄▄░▒███      \n" +
