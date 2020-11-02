@@ -34,6 +34,7 @@ import java.util.Set;
 public abstract class ApplicationVerticle<T extends ApplicationConfig> extends AbstractVerticle {
 
     private final T appConfig;
+    protected  JWTAuth authProvider;
 
     protected ApplicationVerticle (T appConfig) {
         this.appConfig = appConfig;
@@ -52,7 +53,8 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                         .exposedHeaders(getExposedHeaders())
         );
         rootRouter.route().handler(BodyHandler.create());
-        rootRouter.mountSubRouter(appConfig.getApiPrefix(), buildApiRouter());
+        this.authProvider = createAuthProvider();
+        rootRouter.mountSubRouter(appConfig.getApiPrefix(), buildApiRouter(authProvider));
 
         createHttpServer()
                 .requestHandler(rootRouter)
@@ -71,6 +73,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
     }
 
     protected T getAppConfig() { return this.appConfig; }
+    protected JWTAuth getAuthProvider() { return this.authProvider; }
 
     /**
      * Called immediately after Router creation.
@@ -146,13 +149,12 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         return options;
     }
 
-    private Router buildApiRouter() throws RuntimeException {
+    private Router buildApiRouter(JWTAuth authProvider) throws RuntimeException {
         Router router = Router.router(vertx);
         beforeAPIRouterMount(router);
         router.route().handler(createRouteLogHandler());
         router.route().failureHandler(createRouteFailureHandler());
 
-        JWTAuth authProvider = createAuthProvider();
         for (Class<?> controller : getResourceClasses()) {
             try {
                 controller
