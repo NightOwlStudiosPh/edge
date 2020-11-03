@@ -22,8 +22,10 @@ public interface ApplicationConfig {
     }
 
     default String getApiPrefix() {
-        return "/api/";
+        return "/api";
     }
+
+    default String getWebSocketPrefix() { return "/eventbus"; }
 
     default String getBannerText () {
         return ApplicationVerticle.BANNER_TXT;

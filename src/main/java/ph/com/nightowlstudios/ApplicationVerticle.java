@@ -12,20 +12,17 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CorsHandler;
-import io.vertx.ext.web.handler.ErrorHandler;
-import io.vertx.ext.web.handler.LoggerHandler;
+import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
+import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
@@ -55,6 +52,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         rootRouter.route().handler(BodyHandler.create());
         this.authProvider = createAuthProvider();
         rootRouter.mountSubRouter(appConfig.getApiPrefix(), buildApiRouter(authProvider));
+        rootRouter.mountSubRouter(appConfig.getWebSocketPrefix(), buildWebSocketRouter(authProvider));
 
         createHttpServer()
                 .requestHandler(rootRouter)
@@ -63,7 +61,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                         startPromise.complete();
                         log.info(appConfig.getBannerText());
                         log.info("{} online at PORT: {}", appConfig.getApplicationName(), http.result().actualPort());
-                        onServerDeployed(http.result());
+                        onStart(http.result());
                         return;
                     }
                     log.error("Error running server: " + http.cause());
@@ -89,7 +87,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
      */
     protected void beforeAPIRouterMount(Router router){}
 
-    protected void onServerDeployed(HttpServer httpServer){}
+    protected void onStart(HttpServer httpServer){}
     protected void onServerDeployFail(Throwable error){}
 
     protected boolean allowCORSCredentials() { return true; }
@@ -166,6 +164,27 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
             }
         }
         return router;
+    }
+
+    private Router buildWebSocketRouter(JWTAuth authProvider) throws RuntimeException {
+//        router.route("/*").handler(JWTAuthHandler.create(authProvider));
+        SockJSHandler handler = SockJSHandler.create(vertx);
+        SockJSBridgeOptions options = new SockJSBridgeOptions();
+
+        List<PermittedOptions> inbound = new ArrayList<>(addInboundSocketRules());
+        options.setInboundPermitted(inbound);
+
+        List<PermittedOptions> outbound = new ArrayList<>(addOutboundSocketRules());
+        options.setOutboundPermitted(outbound);
+        return  handler.bridge(options);
+    }
+
+    protected List<PermittedOptions> addInboundSocketRules() {
+        return new ArrayList<>();
+    }
+
+    protected List<PermittedOptions> addOutboundSocketRules() {
+        return new ArrayList<>();
     }
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationVerticle.class);
