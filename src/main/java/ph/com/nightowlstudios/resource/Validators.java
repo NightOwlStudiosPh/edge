@@ -32,7 +32,7 @@ public final class Validators {
         return ofList(validators);
     }
 
-    public static Handler<RoutingContext> requiredPathParams(String... params) {
+    public static Handler<RoutingContext> requiredRequestParams(String... params) {
         List<Validator<HttpServerRequest>> validators = Arrays
                 .stream(params)
                 .map(param -> new ValidatorImpl<>(
