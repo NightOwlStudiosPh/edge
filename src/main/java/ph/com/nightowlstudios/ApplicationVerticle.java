@@ -85,7 +85,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
      *
      * @param router api subrouter
      */
-    protected void beforeAPIRouterMount(Router router){}
+    protected void apiRoutesSetup(Router router){}
 
     protected void onStart(HttpServer httpServer){}
     protected void onServerDeployFail(Throwable error){}
@@ -149,7 +149,6 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
 
     private Router buildApiRouter(JWTAuth authProvider) throws RuntimeException {
         Router router = Router.router(vertx);
-        beforeAPIRouterMount(router);
         router.route().handler(createRouteLogHandler());
         router.route().failureHandler(createRouteFailureHandler());
 
@@ -163,6 +162,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                 e.printStackTrace();
             }
         }
+        apiRoutesSetup(router);
         return router;
     }
 
