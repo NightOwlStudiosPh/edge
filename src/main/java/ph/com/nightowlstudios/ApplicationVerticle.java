@@ -104,7 +104,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
     }
 
     protected abstract JWTAuth createAuthProvider();
-    protected abstract Class<Resource>[] getResourceClasses();
+    protected abstract  <R extends Resource> Class<R>[] getResourceClasses();
 
     private HttpServer createHttpServer() {
         if (appConfig.isProduction()) {
