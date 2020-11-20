@@ -21,6 +21,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ph.com.nightowlstudios.resource.Resource;
 
 import java.util.*;
 
@@ -103,7 +104,7 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
     }
 
     protected abstract JWTAuth createAuthProvider();
-    protected abstract Class<?>[] getResourceClasses();
+    protected abstract Class<Resource>[] getResourceClasses();
 
     private HttpServer createHttpServer() {
         if (appConfig.isProduction()) {
@@ -152,10 +153,9 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         router.route().handler(createRouteLogHandler());
         router.route().failureHandler(createRouteFailureHandler());
 
-        for (Class<?> controller : getResourceClasses()) {
+        for (Class<Resource> controller : getResourceClasses()) {
             try {
-                controller
-                        .getDeclaredConstructor(Router.class, JWTAuth.class)
+               controller.getDeclaredConstructor(Router.class, JWTAuth.class)
                         .newInstance(router, authProvider);
             } catch (Exception e) {
                 log.error("Unable to load {}. Error on {}. ", controller.getCanonicalName(), e.getMessage());

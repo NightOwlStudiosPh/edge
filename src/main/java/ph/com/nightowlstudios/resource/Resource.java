@@ -1,6 +1,5 @@
 package ph.com.nightowlstudios.resource;
 
-import ph.com.nightowlstudios.auth.UserRole;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -14,15 +13,13 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ph.com.nightowlstudios.persistence.PersistenceClient;
+import ph.com.nightowlstudios.auth.UserRole;
 
 /**
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 9/12/20
  */
 public abstract class Resource {
-    private static final PersistenceClient dbClient = new PersistenceClient();
-
     private final Logger logger;
 
     private final Router router;
@@ -35,11 +32,8 @@ public abstract class Resource {
         this.logger = LoggerFactory.getLogger(this.getClass());
 
         logger().info("Loading {}...", this.getClass().getCanonicalName());
-        setUp(dbClient);
         routes();
     }
-
-    protected abstract void setUp(PersistenceClient dbClient);
 
     protected abstract void routes();
 
