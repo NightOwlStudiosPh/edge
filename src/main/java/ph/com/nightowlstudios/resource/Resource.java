@@ -41,7 +41,7 @@ public abstract class Resource {
      * For <code>Resource</code> subclasses. Use when initializing
      * and setting up new Resource variants.
      */
-    abstract void init();
+    void init() {}
 
     /**
      * Executed before routes declaration. Setup services and any resource needed by
