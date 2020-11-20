@@ -32,9 +32,26 @@ public abstract class Resource {
         this.logger = LoggerFactory.getLogger(this.getClass());
 
         logger().info("Loading {}...", this.getClass().getCanonicalName());
+        init();
+        setUp();
         routes();
     }
 
+    /**
+     * For <code>Resource</code> subclasses. Use when initializing
+     * and setting up new Resource variants.
+     */
+    abstract void init();
+
+    /**
+     * Executed before routes declaration. Setup services and any resource needed by
+     * route handlers inside this hook.
+     */
+    protected abstract void setUp();
+
+    /**
+     * Define routes and their route handlers.
+     */
     protected abstract void routes();
 
     protected Logger logger() {

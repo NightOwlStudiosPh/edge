@@ -10,13 +10,22 @@ import ph.com.nightowlstudios.persistence.PersistenceClient;
  */
 public abstract class DatabaseResource extends Resource {
 
-    private final PersistenceClient dbClient;
+    private PersistenceClient dbClient;
 
     public DatabaseResource(Router router, JWTAuth authProvider) {
         super(router, authProvider);
-        this.dbClient = createDbClient();
     }
 
+    @Override
+    void init() {
+        this.dbClient = this.createDbClient();
+    }
+
+    /**
+     * Creates default persistence client based from config.
+     * Override if using a different client.
+     * @return database client
+     */
     protected PersistenceClient createDbClient() {
         return new PersistenceClient();
     }
