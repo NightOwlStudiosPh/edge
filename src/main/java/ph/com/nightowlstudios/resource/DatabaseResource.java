@@ -12,8 +12,8 @@ public abstract class DatabaseResource extends Resource {
 
     private PersistenceClient dbClient;
 
-    public DatabaseResource(Router router, JWTAuth authProvider) {
-        super(router, authProvider);
+    public DatabaseResource(Router router) {
+        super(router);
     }
 
     @Override

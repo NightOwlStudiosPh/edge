@@ -11,7 +11,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.core.net.PfxOptions;
-import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -32,16 +31,15 @@ import java.util.*;
 public abstract class ApplicationVerticle<T extends ApplicationConfig> extends AbstractVerticle {
 
     private final T appConfig;
-    protected  JWTAuth authProvider;
 
-    protected ApplicationVerticle (T appConfig) {
+    public ApplicationVerticle (T appConfig) {
         this.appConfig = appConfig;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
         Router rootRouter = Router.router(vertx);
-        onRootRouterCreate(rootRouter);
+        beforeRouterCreate(rootRouter);
         rootRouter.route().handler(
                 CorsHandler
                         .create(appConfig.getAllowedOrigins())
@@ -51,9 +49,8 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                         .exposedHeaders(getExposedHeaders())
         );
         rootRouter.route().handler(BodyHandler.create());
-        this.authProvider = createAuthProvider();
-        rootRouter.mountSubRouter(appConfig.getApiPrefix(), buildApiRouter(authProvider));
-        rootRouter.mountSubRouter(appConfig.getWebSocketPrefix(), buildWebSocketRouter(authProvider));
+        rootRouter.mountSubRouter(appConfig.getApiPrefix(), createApiRouter());
+        rootRouter.mountSubRouter(appConfig.getWebSocketPrefix(), createWebSocketRouter());
 
         createHttpServer()
                 .requestHandler(rootRouter)
@@ -67,29 +64,28 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                     }
                     log.error("Error running server: " + http.cause());
                     startPromise.fail(http.cause());
-                    onServerDeployFail(http.cause());
+                    onStartFail(http.cause());
                 });
     }
 
     protected T getAppConfig() { return this.appConfig; }
-    protected JWTAuth getAuthProvider() { return this.authProvider; }
 
     /**
      * Called immediately after Router creation.
      *
      * @param router the root router
      */
-    protected void onRootRouterCreate(Router router){}
+    protected void beforeRouterCreate(Router router) {}
 
     /**
      * Called before mounting API subrouter.
      *
-     * @param router api subrouter
+     * @param apiRouter api subrouter
      */
-    protected void apiRoutesSetup(Router router){}
+    protected void setupRoutes(Router apiRouter) {}
 
-    protected void onStart(HttpServer httpServer){}
-    protected void onServerDeployFail(Throwable error){}
+    protected void onStart(HttpServer httpServer) {}
+    protected void onStartFail(Throwable error) {}
 
     protected boolean allowCORSCredentials() { return true; }
     protected Set<HttpMethod> getAllowedMethods() { return  ALLOWED_METHODS; }
@@ -100,10 +96,9 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         return LoggerHandler.create();
     }
     protected Handler<RoutingContext> createRouteFailureHandler() {
-        return ErrorHandler.create();
+        return ErrorHandler.create(getVertx());
     }
 
-    protected abstract JWTAuth createAuthProvider();
     protected abstract  <R extends Resource> Class<R>[] getResourceClasses();
 
     private HttpServer createHttpServer() {
@@ -148,34 +143,32 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         return options;
     }
 
-    private Router buildApiRouter(JWTAuth authProvider) throws RuntimeException {
+    private Router createApiRouter() throws RuntimeException {
         Router router = Router.router(vertx);
         router.route().handler(createRouteLogHandler());
         router.route().failureHandler(createRouteFailureHandler());
 
         for (Class<Resource> controller : getResourceClasses()) {
             try {
-               controller.getDeclaredConstructor(Router.class, JWTAuth.class)
-                        .newInstance(router, authProvider);
+               controller.getDeclaredConstructor(Router.class).newInstance(router);
             } catch (Exception e) {
                 log.error("Unable to load {}. Error on {}. ", controller.getCanonicalName(), e.getMessage());
                 e.printStackTrace();
             }
         }
-        apiRoutesSetup(router);
+        setupRoutes(router);
         return router;
     }
 
-    private Router buildWebSocketRouter(JWTAuth authProvider) throws RuntimeException {
-//        router.route("/*").handler(JWTAuthHandler.create(authProvider));
+    private Router createWebSocketRouter() throws RuntimeException {
         SockJSHandler handler = SockJSHandler.create(vertx);
         SockJSBridgeOptions options = new SockJSBridgeOptions();
 
         List<PermittedOptions> inbound = new ArrayList<>(addInboundSocketRules());
-        options.setInboundPermitted(inbound);
+        options.setInboundPermitteds(inbound);
 
         List<PermittedOptions> outbound = new ArrayList<>(addOutboundSocketRules());
-        options.setOutboundPermitted(outbound);
+        options.setOutboundPermitteds(outbound);
         return  handler.bridge(options);
     }
 
