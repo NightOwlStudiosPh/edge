@@ -23,18 +23,13 @@ import org.slf4j.LoggerFactory;
 import ph.com.nightowlstudios.resource.Resource;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 7/14/20
  */
-public abstract class ApplicationVerticle<T extends ApplicationConfig> extends AbstractVerticle {
-
-    private final T appConfig;
-
-    public ApplicationVerticle (T appConfig) {
-        this.appConfig = appConfig;
-    }
+public abstract class ApplicationVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -42,23 +37,23 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
         beforeRouterCreate(rootRouter);
         rootRouter.route().handler(
                 CorsHandler
-                        .create(appConfig.getAllowedOrigins())
+                        .create(allowedOrigins())
                         .allowCredentials(allowCORSCredentials())
-                        .allowedMethods(getAllowedMethods())
-                        .allowedHeaders(getAllowedHeaders())
-                        .exposedHeaders(getExposedHeaders())
+                        .allowedMethods(allowedMethods())
+                        .allowedHeaders(allowedHeaders())
+                        .exposedHeaders(exposedHeaders())
         );
         rootRouter.route().handler(BodyHandler.create());
-        rootRouter.mountSubRouter(appConfig.getApiPrefix(), createApiRouter());
-        rootRouter.mountSubRouter(appConfig.getWebSocketPrefix(), createWebSocketRouter());
+        rootRouter.mountSubRouter(apiPrefix(), createApiRouter());
+        rootRouter.mountSubRouter(webSocketPrefix(), createWebSocketRouter());
 
         createHttpServer()
                 .requestHandler(rootRouter)
-                .listen(appConfig.getPort(), http -> {
+                .listen(getPort(), http -> {
                     if (http.succeeded()) {
                         startPromise.complete();
-                        log.info(appConfig.getBannerText());
-                        log.info("{} online at PORT: {}", appConfig.getApplicationName(), http.result().actualPort());
+                        log.info(bannerText());
+                        log.info("{} online at PORT: {}", appName(), http.result().actualPort());
                         onStart(http.result());
                         return;
                     }
@@ -67,8 +62,6 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
                     onStartFail(http.cause());
                 });
     }
-
-    protected T getAppConfig() { return this.appConfig; }
 
     /**
      * Called immediately after Router creation.
@@ -83,14 +76,37 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
      * @param apiRouter api subrouter
      */
     protected void setupRoutes(Router apiRouter) {}
-
     protected void onStart(HttpServer httpServer) {}
     protected void onStartFail(Throwable error) {}
 
+    protected int getPort() { return config().getInteger("port", 8888); }
+
+    protected String appName() { return config().getString("name", "edge.api"); }
+    protected String version() { return config().getString("version", "1.0"); }
     protected boolean allowCORSCredentials() { return true; }
-    protected Set<HttpMethod> getAllowedMethods() { return  ALLOWED_METHODS; }
-    protected Set<String> getAllowedHeaders() { return ALLOWED_HEADERS; }
-    protected Set<String> getExposedHeaders() { return EXPOSED_HEADERS; }
+    protected Set<HttpMethod> allowedMethods() { return  ALLOWED_METHODS; }
+    protected Set<String> allowedHeaders() { return ALLOWED_HEADERS; }
+    protected Set<String> exposedHeaders() { return EXPOSED_HEADERS; }
+    protected String allowedOrigins() { return config().getString("allowedOrigins", "*"); }
+    protected String apiPrefix() { return config().getString("apiPrefix", "/api"); }
+    protected String webSocketPrefix() { return config().getString("wsPrefix", "/ws"); }
+
+    protected String bannerText() { return BANNER_TXT; }
+
+    protected boolean isProduction() {
+        Predicate<String> isProdEnv = value ->
+                value.equalsIgnoreCase("prod") ||
+                value.equalsIgnoreCase("production");
+
+        if (StringUtils.isEmpty(config().getString("env", StringUtils.EMPTY))) {
+            return isProdEnv.test(Optional.ofNullable(System.getenv("env")).orElse("prod"));
+        }
+        return isProdEnv.test(config().getString("env"));
+    }
+
+    protected JsonObject sslConfig() {
+        return config().getJsonObject("ssl", new JsonObject());
+    }
 
     protected Handler<RoutingContext> createRouteLogHandler() {
         return LoggerHandler.create();
@@ -102,14 +118,14 @@ public abstract class ApplicationVerticle<T extends ApplicationConfig> extends A
     protected abstract  <R extends Resource> Class<R>[] getResourceClasses();
 
     private HttpServer createHttpServer() {
-        if (appConfig.isProduction()) {
+        if (isProduction() && !sslConfig().isEmpty()) {
             return vertx.createHttpServer(createSSLHttpOptions());
         }
         return vertx.createHttpServer();
     }
 
     private HttpServerOptions createSSLHttpOptions () {
-        JsonObject ssl = appConfig.getSSLConfig();
+        JsonObject ssl = sslConfig();
 
         HttpServerOptions options = new HttpServerOptions()
                 .setUseAlpn(false)
