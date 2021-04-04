@@ -44,7 +44,7 @@ public abstract class Resource {
      * Executed before routes declaration. Setup services and any resource needed by
      * route handlers inside this hook.
      */
-    protected abstract void setUp();
+    protected void setUp() {};
 
     /**
      * Define routes and their route handlers.

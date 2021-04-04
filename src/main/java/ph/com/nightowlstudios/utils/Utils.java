@@ -1,10 +1,10 @@
 package ph.com.nightowlstudios.utils;
 
-import ph.com.nightowlstudios.entity.Entity;
 import io.vavr.control.Try;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import ph.com.nightowlstudios.entity.Entity;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -28,7 +28,7 @@ public final class Utils {
      * Merges the field values of <code>to</code> onto <code>from</code>, replacing <code>from</code>'s value
      * with <code>to</code>'s <code>non-null</code> value. If <code>to</code>'s value for a certain field
      * is <code>null</code>, resulting return object will take <code>from</code>'s value for that field.
-     * <br/><br/>
+     * <br><br>
      * This does not mutate the original objects.
      *
      * @param from object to replace values with

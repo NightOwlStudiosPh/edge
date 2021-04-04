@@ -1,6 +1,6 @@
 # Edge
-[![edge](https://img.shields.io/badge/edge-4.400.4-blue.svg)](https://vertx.io")
-[![vertx](https://img.shields.io/badge/vert.x-4.0.0-purple.svg)](https://vertx.io")
+[![edge](https://img.shields.io/badge/edge-4.3.422-blue.svg)](https://github.com/NightOwlStudiosPh/edge)
+[![vertx](https://img.shields.io/badge/vert.x-4.0.0-purple.svg)](https://vertx.io)
 
 A simple library for building REST API using Vertx.
 
