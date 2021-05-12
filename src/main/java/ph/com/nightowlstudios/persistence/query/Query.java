@@ -1,7 +1,7 @@
 package ph.com.nightowlstudios.persistence.query;
 
-import ph.com.nightowlstudios.entity.Entity;
 import io.vertx.sqlclient.Tuple;
+import ph.com.nightowlstudios.entity.Entity;
 
 import java.util.UUID;
 
@@ -10,59 +10,60 @@ import java.util.UUID;
  * @since 9/12/20
  */
 public interface Query {
-    String sql();
-    Tuple tuple();
+  String sql();
 
-    static QueryBuilder select(String fromTable) {
-        return QueryBuilder.select(fromTable);
-    }
+  Tuple tuple();
 
-    static <T extends Entity> QueryBuilder select(Class<T> entityClass) {
-        return QueryBuilder.select(entityClass);
-    }
+  static QueryBuilder select(String fromTable) {
+    return QueryBuilder.select(fromTable);
+  }
 
-    static QueryBuilder update(String table) {
-        return QueryBuilder.update(table);
-    }
+  static <T extends Entity> QueryBuilder select(Class<T> entityClass) {
+    return QueryBuilder.select(entityClass);
+  }
 
-    static <T extends Entity> QueryBuilder update(Class<T> entityClass) {
-        return QueryBuilder.update(entityClass);
-    }
+  static QueryBuilder update(String table) {
+    return QueryBuilder.update(table);
+  }
 
-    static QueryBuilder insert(String into) {
-        return QueryBuilder.insert(into);
-    }
+  static <T extends Entity> QueryBuilder update(Class<T> entityClass) {
+    return QueryBuilder.update(entityClass);
+  }
 
-    static <T extends Entity> QueryBuilder insert(Class<T> entityClass) {
-        return QueryBuilder.insert(entityClass);
-    }
+  static QueryBuilder insert(String into) {
+    return QueryBuilder.insert(into);
+  }
 
-    static QueryBuilder delete(String from) {
-        return QueryBuilder.delete(from);
-    }
+  static <T extends Entity> QueryBuilder insert(Class<T> entityClass) {
+    return QueryBuilder.insert(entityClass);
+  }
 
-    static <T extends Entity> QueryBuilder delete(Class<T> from) {
-        return QueryBuilder.delete(from);
-    }
+  static QueryBuilder delete(String from) {
+    return QueryBuilder.delete(from);
+  }
 
-    static Query select(String tableName, UUID id) {
-        return Query.select(tableName).allColumns().where(id).build();
-    }
+  static <T extends Entity> QueryBuilder delete(Class<T> from) {
+    return QueryBuilder.delete(from);
+  }
 
-    static <T extends Entity> Query select(Class<T> entityClass, UUID id) {
-        return Query.select(entityClass).allColumns().where(id).build();
-    }
+  static Query select(String tableName, UUID id) {
+    return Query.select(tableName).allColumns().where(id).build();
+  }
 
-    static <T extends Entity> Query insert(T entity) {
-        return QueryBuilder.insert(entity);
-    }
+  static <T extends Entity> Query select(Class<T> entityClass, UUID id) {
+    return Query.select(entityClass).allColumns().where(id).build();
+  }
 
-    static <T extends Entity> Query update(T entity) {
-        return QueryBuilder.update(entity);
-    }
+  static <T extends Entity> Query insert(T entity) {
+    return QueryBuilder.insert(entity);
+  }
 
-    static <T extends Entity> Query delete(T entity) {
-        return QueryBuilder.delete(entity);
-    }
+  static <T extends Entity> Query update(T entity) {
+    return QueryBuilder.update(entity);
+  }
+
+  static <T extends Entity> Query delete(T entity) {
+    return QueryBuilder.delete(entity);
+  }
 }
 

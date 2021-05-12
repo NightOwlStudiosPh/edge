@@ -62,8 +62,8 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
 
   /**
    * This is the very first method to be called when launching the main verticle.
-   * This is where {@link ph.com.nightowlstudios.service.Service} verticles should be registered using any of the {@link #registerService(Class)}
-   *
+   * This is where {@link ph.com.nightowlstudios.service.Service} verticles should be registered using any of the {@link #registerService(Class[])}
+   * <p>
    * An Http server verticle is also automatically internally registered to Http requests.
    *
    * @see ph.com.nightowlstudios.service.Service
@@ -94,8 +94,11 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
     return vertx.deployVerticle(verticle, new DeploymentOptions().setConfig(config()));
   }
 
-  protected <T extends Service> void registerService(Class<T> service) {
-    this.registerService(service, new DeploymentOptions());
+  @SafeVarargs
+  protected final <T extends Service> void registerService(Class<T>... services) {
+    for (Class<T> service : services) {
+      this.registerService(service, new DeploymentOptions());
+    }
   }
 
   protected <T extends Service> void registerService(Class<T> service, DeploymentOptions options) {
@@ -107,28 +110,32 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
    *
    * @param router the root router
    */
-  protected void beforeRouterCreate(Router router) {}
+  protected void beforeRouterCreate(Router router) {
+  }
 
   /**
    * Called before mounting API subrouter.
    *
    * @param apiRouter api subrouter
    */
-  protected void setupRoutes(Router apiRouter) {}
+  protected void setupRoutes(Router apiRouter) {
+  }
 
   /**
    * Called when the HttpServer has been started.
    *
    * @param httpServer the started server
    */
-  protected void onStart(HttpServer httpServer) {}
+  protected void onStart(HttpServer httpServer) {
+  }
 
   /**
    * Called when the HttpServer failed to start
    *
    * @param error cause of the failure
    */
-  protected void onStartFail(Throwable error) {}
+  protected void onStartFail(Throwable error) {
+  }
 
   protected final String appName() {
     return config().getString("name", "edge.api");
@@ -174,6 +181,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
     return ErrorHandler.create(getVertx());
   }
 
+  @SuppressWarnings("unchecked")
   protected abstract <R extends Resource> Class<R>[] getResourceClasses();
 
   private Router createWebSocketRouter(Vertx vertx) throws RuntimeException {

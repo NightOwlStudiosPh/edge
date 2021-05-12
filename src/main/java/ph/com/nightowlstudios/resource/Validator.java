@@ -11,8 +11,11 @@ import java.util.function.Predicate;
  * @since 7/6/20
  */
 public interface Validator<T> {
-    Predicate<T> predicate();
-    Function<RoutingContext, T> requestMapper();
-    HttpResponseStatus responseStatus();
-    String errorMessage();
+  Predicate<T> predicate();
+
+  Function<RoutingContext, T> requestMapper();
+
+  HttpResponseStatus responseStatus();
+
+  String errorMessage();
 }

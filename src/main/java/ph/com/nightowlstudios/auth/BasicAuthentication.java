@@ -22,54 +22,54 @@ import java.util.stream.Collectors;
  */
 public class BasicAuthentication {
 
-    public static final String CLAIM = "permissions";
-    private static BasicAuthentication theInstance = null;
+  public static final String CLAIM = "permissions";
+  private static BasicAuthentication theInstance = null;
 
-    private final JWTAuth jwtAuth;
-    private final JsonObject config;
+  private final JWTAuth jwtAuth;
+  private final JsonObject config;
 
-    private BasicAuthentication() {
-        Vertx context = Vertx.currentContext().owner();
-        this.config = context.getOrCreateContext().config().getJsonObject("keystore");
-        this.jwtAuth = JWTAuth.create(
-                context, new JWTAuthOptions()
-                    .setKeyStore(new KeyStoreOptions()
-                            .setType(this.config.getString("type"))
-                            .setPath(this.config.getString("path"))
-                            .setPassword(this.config.getString("password"))
-                    )
-        );
+  private BasicAuthentication() {
+    Vertx context = Vertx.currentContext().owner();
+    this.config = context.getOrCreateContext().config().getJsonObject("keystore");
+    this.jwtAuth = JWTAuth.create(
+      context, new JWTAuthOptions()
+        .setKeyStore(new KeyStoreOptions()
+          .setType(this.config.getString("type"))
+          .setPath(this.config.getString("path"))
+          .setPassword(this.config.getString("password"))
+        )
+    );
+  }
+
+  public static BasicAuthentication getInstance() {
+    if (theInstance == null) {
+      theInstance = new BasicAuthentication();
     }
+    return theInstance;
+  }
 
-    public static BasicAuthentication getInstance() {
-        if (theInstance == null) {
-            theInstance = new BasicAuthentication();
-        }
-        return theInstance;
-    }
+  public JWTAuth getAuthProvider() {
+    return this.jwtAuth;
+  }
 
-    public JWTAuth getAuthProvider () {
-        return this.jwtAuth;
-    }
+  public String generateToken(JsonObject claims, UserRole userRole) {
+    JWTOptions options = new JWTOptions()
+      .setAlgorithm(this.config.getString("algorithm"))
+      .setPermissions(Arrays
+        .stream(UserRole.values())
+        .filter(role -> userRole.ordinal() >= role.ordinal())
+        .map(Enum::toString)
+        .collect(Collectors.toList()));
+    return theInstance.jwtAuth.generateToken(claims, options);
+  }
 
-    public String generateToken(JsonObject claims, UserRole userRole) {
-        JWTOptions options = new JWTOptions()
-                .setAlgorithm(this.config.getString("algorithm"))
-                .setPermissions(Arrays
-                    .stream(UserRole.values())
-                    .filter(role -> userRole.ordinal() >= role.ordinal())
-                    .map(Enum::toString)
-                    .collect(Collectors.toList()));
-        return theInstance.jwtAuth.generateToken(claims, options);
-    }
+  public Handler<RoutingContext> createAuthNHandler() {
+    return JWTAuthHandler.create(this.jwtAuth);
+  }
 
-    public Handler<RoutingContext> createAuthNHandler() {
-        return JWTAuthHandler.create(this.jwtAuth);
-    }
-
-    public Handler<RoutingContext> createAuthZHandler(UserRole role) {
-        return AuthorizationHandler
-            .create(PermissionBasedAuthorization.create(role.toString()))
-            .addAuthorizationProvider(JWTAuthorization.create(CLAIM));
-    }
+  public Handler<RoutingContext> createAuthZHandler(UserRole role) {
+    return AuthorizationHandler
+      .create(PermissionBasedAuthorization.create(role.toString()))
+      .addAuthorizationProvider(JWTAuthorization.create(CLAIM));
+  }
 }

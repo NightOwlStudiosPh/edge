@@ -2,17 +2,14 @@ package ph.com.nightowlstudios.service;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>yev</i></a>
@@ -26,8 +23,7 @@ public abstract class Service extends AbstractVerticle {
     this.log = LoggerFactory.getLogger(this.getClass());
   }
 
-  private final Map<String, Message<JsonObject>> messages = new HashMap<>();
-
+  @SuppressWarnings("unchecked")
   @Override
   public void start() throws Exception {
     setup(vertx);
@@ -37,9 +33,13 @@ public abstract class Service extends AbstractVerticle {
         String action = message.headers().get("action");
         try {
           JsonObject body = message.body();
-          messages.put(action, message);
           Method method = this.getClass().getMethod(action, ServiceUtils.extractRequestPayloadParameterTypes(body));
-          method.invoke(this, ServiceUtils.extractRequestPayloadParameters(body));
+          Future<Object> response = (Future<Object>) method.invoke(this, ServiceUtils.extractRequestPayloadParameters(body));
+          response.onSuccess(payload -> {
+            if (!payload.getClass().getName().equals(Void.class.getName())) {
+              message.reply(ServiceUtils.buildReplyPayload(payload));
+            }
+          }).onFailure(failure -> message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), failure.getMessage()));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
           log.error(String.format("Error encountered upon handling of %s action on %s service.", action, this.getClass().getName()), e.getCause());
           message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), e.getMessage());
@@ -55,17 +55,4 @@ public abstract class Service extends AbstractVerticle {
    */
   protected abstract void setup(Vertx vertx);
 
-  protected <T> void reply(String action, T message) {
-    Optional
-      .ofNullable(messages.get(action))
-      .ifPresent(m -> m.reply(ServiceUtils.buildReplyPayload(message)));
-    messages.remove(action);
-  }
-
-  protected void fail(String action, int code, String message) {
-    Optional
-      .ofNullable(messages.get(action))
-      .ifPresent(m -> m.fail(code, message));
-    messages.remove(action);
-  }
 }

@@ -10,7 +10,8 @@ import ph.com.nightowlstudios.service.ServiceBus;
  **/
 public class Edge {
 
-  private Edge() {}
+  private Edge() {
+  }
 
   public static <T extends Service> ServiceBus<T> serviceBus(Class<T> serviceClass) {
     return new ServiceBus<>(serviceClass);

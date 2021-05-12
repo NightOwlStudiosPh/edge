@@ -16,30 +16,30 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ValidationHandler {
 
-    public static Handler<RoutingContext> create(String... requiredParams) {
-        return ctx -> {
-            JsonObject body = ctx.getBodyAsJson();
-            for (String param :requiredParams) {
-                if (!body.containsKey(param)) {
-                    ctx.fail(HttpResponseStatus.BAD_REQUEST.code());
-                    ctx.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end("Missing required parameter");
-                    return;
-                }
-            }
-            ctx.next();
-        };
-    }
+  public static Handler<RoutingContext> create(String... requiredParams) {
+    return ctx -> {
+      JsonObject body = ctx.getBodyAsJson();
+      for (String param : requiredParams) {
+        if (!body.containsKey(param)) {
+          ctx.fail(HttpResponseStatus.BAD_REQUEST.code());
+          ctx.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end("Missing required parameter");
+          return;
+        }
+      }
+      ctx.next();
+    };
+  }
 
-    public static Handler<RoutingContext> create(Validator<JsonObject> validator) {
-        return ctx -> {
-            JsonObject body = ctx.getBodyAsJson();
-            if (!validator.predicate().test(body)) {
-                ctx.fail(HttpResponseStatus.PRECONDITION_FAILED.code());
-                ctx.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code()).end(validator.errorMessage());
-                return;
-            }
-            ctx.next();
-        };
-    }
+  public static Handler<RoutingContext> create(Validator<JsonObject> validator) {
+    return ctx -> {
+      JsonObject body = ctx.getBodyAsJson();
+      if (!validator.predicate().test(body)) {
+        ctx.fail(HttpResponseStatus.PRECONDITION_FAILED.code());
+        ctx.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code()).end(validator.errorMessage());
+        return;
+      }
+      ctx.next();
+    };
+  }
 }
 

@@ -5,6 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -13,6 +15,7 @@ import java.util.Optional;
  * @since 4/4/21
  **/
 public class ServiceBus<T extends Service> {
+  private static final Logger log = LoggerFactory.getLogger(ServiceBus.class);
 
   private final Class<T> serviceClass;
   private final Vertx vertx;
@@ -30,7 +33,6 @@ public class ServiceBus<T extends Service> {
   public <S> Future<Optional<S>> request(String action, Object... payload) {
     DeliveryOptions options = new DeliveryOptions().addHeader("action", action);
     JsonObject body = ServiceUtils.buildRequestPayload(payload);
-    System.out.println(body.encodePrettily());
     return this.vertx
       .eventBus()
       .<JsonObject>request(this.serviceClass.getName(), body, options)
@@ -41,8 +43,9 @@ public class ServiceBus<T extends Service> {
             ? ServiceUtils.unwrapRequestResponse(responseBody)
             : Optional.empty();
         } catch (Exception e) {
+          log.error(String.format("Error unwrapping %s.%s response", this.serviceClass.getName(), action), e);
           message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), e.getMessage());
-          return Optional.empty();
+          throw new RuntimeException();
         }
       });
   }

@@ -5,8 +5,8 @@ package ph.com.nightowlstudios.auth;
  * @since 9/12/20
  */
 public enum UserRole {
-    User,
-    Admin,
-    SuperUser,
-    GodLike
+  User,
+  Admin,
+  SuperUser,
+  GodLike
 }

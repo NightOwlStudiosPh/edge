@@ -8,14 +8,13 @@ import java.lang.annotation.Target;
 /**
  * Table name of an {@link ph.com.nightowlstudios.entity.Entity}. Used by {@code PersistenceClient}
  *
+ * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @see ph.com.nightowlstudios.entity.Entity
  * @see ph.com.nightowlstudios.persistence.PersistenceClient
- *
- * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>@yev</i></a>
  * @since 7/3/20
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Table {
-    String value();
+  String value();
 }
