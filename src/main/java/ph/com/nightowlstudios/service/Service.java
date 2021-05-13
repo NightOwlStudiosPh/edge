@@ -36,7 +36,8 @@ public abstract class Service extends AbstractVerticle {
           Method method = this.getClass().getMethod(action, ServiceUtils.extractRequestPayloadParameterTypes(body));
           Future<Object> response = (Future<Object>) method.invoke(this, ServiceUtils.extractRequestPayloadParameters(body));
           response.onSuccess(payload -> {
-            if (!payload.getClass().getName().equals(Void.class.getName())) {
+            // Payload can be null, EdgeService will reply with an Optional.empty()
+            if (payload == null || !payload.getClass().getName().equals(Void.class.getName())) {
               message.reply(ServiceUtils.buildReplyPayload(payload));
             }
           }).onFailure(failure -> message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), failure.getMessage()));
