@@ -8,8 +8,9 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.IllegalFormatException;
+import java.util.NoSuchElementException;
 
 /**
  * @author <a href="mailto:josephharveyangeles@gmail.com">Joseph Harvey Angeles - <i>yev</i></a>
@@ -40,13 +41,27 @@ public abstract class Service extends AbstractVerticle {
             if (payload == null || !payload.getClass().getName().equals(Void.class.getName())) {
               message.reply(ServiceUtils.buildReplyPayload(payload));
             }
-          }).onFailure(failure -> message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), failure.getMessage()));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+          }).onFailure(failure -> message.fail(getFailureCode(failure), failure.getMessage()));
+        } catch (NoSuchElementException | NullPointerException npe) {
+          message.fail(HttpResponseStatus.NOT_FOUND.code(), npe.getMessage());
+        } catch (IllegalAccessException | IllegalArgumentException ie) {
+          message.fail(HttpResponseStatus.UNAUTHORIZED.code(), ie.getMessage());
+        } catch (Exception e) {
           log.error(String.format("Error encountered upon handling of %s action on %s service.", action, this.getClass().getName()), e.getCause());
           message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), e.getMessage());
         }
       });
     super.start();
+  }
+
+  private int getFailureCode(Throwable failure) {
+    if (failure instanceof NoSuchElementException || failure instanceof NullPointerException) {
+      return HttpResponseStatus.NOT_FOUND.code();
+    } else if (failure instanceof IllegalAccessException || failure instanceof IllegalFormatException) {
+      return HttpResponseStatus.FORBIDDEN.code();
+    } else {
+      return HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
+    }
   }
 
   /**

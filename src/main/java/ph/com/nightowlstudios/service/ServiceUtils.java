@@ -20,7 +20,8 @@ public class ServiceUtils {
   public static final String TYPE = "type";
   public static final String NIL_TYPE = "nil";
 
-  private ServiceUtils() {}
+  private ServiceUtils() {
+  }
 
   static JsonObject buildRequestPayload(Object... payload) {
     JsonArray array = new JsonArray();
@@ -143,9 +144,31 @@ public class ServiceUtils {
     JsonArray types = body.getJsonArray(TYPE);
     List<Class<?>> classes = new ArrayList<>();
     for (int i = 0; i < types.size(); i++) {
-      classes.add(Class.forName(types.getString(i)));
+      classes.add(autoboxExtractParameterType(types.getString(i)));
     }
     return classes.toArray(new Class[0]);
+  }
+
+  static Class<?> autoboxExtractParameterType(String typeName) throws ClassNotFoundException {
+    if (typeName.equals(Integer.class.getName())) {
+      return int.class;
+    } else if (typeName.equals(Long.class.getName())) {
+      return long.class;
+    } else if (typeName.equals(Float.class.getName())) {
+      return float.class;
+    } else if (typeName.equals(Double.class.getName())) {
+      return double.class;
+    } else if (typeName.equals(Boolean.class.getName())) {
+      return boolean.class;
+    } else if (typeName.equals(Character.class.getName())) {
+      return char.class;
+    } else if (typeName.equals(Byte.class.getName())) {
+      return byte.class;
+    } else if (typeName.equals(Short.class.getName())) {
+      return short.class;
+    } else {
+      return Class.forName(typeName);
+    }
   }
 
   static <T> JsonObject buildReplyPayload(T message) {
@@ -171,7 +194,7 @@ public class ServiceUtils {
       JsonArray array = new JsonArray();
       list.forEach(item -> array.add(buildReplyPayload(item)));
       return array;
-    } else  {
+    } else {
       return object;
     }
   }
