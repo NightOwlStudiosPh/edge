@@ -42,19 +42,16 @@ public abstract class Service extends AbstractVerticle {
               message.reply(ServiceUtils.buildReplyPayload(payload));
             }
           }).onFailure(failure -> message.fail(getFailureCode(failure), failure.getMessage()));
-        } catch (NoSuchElementException | NullPointerException npe) {
-          message.fail(HttpResponseStatus.NOT_FOUND.code(), npe.getMessage());
-        } catch (IllegalAccessException | IllegalArgumentException ie) {
-          message.fail(HttpResponseStatus.UNAUTHORIZED.code(), ie.getMessage());
         } catch (Exception e) {
           log.error(String.format("Error encountered upon handling of %s action on %s service.", action, this.getClass().getName()), e.getCause());
-          message.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), e.getMessage());
+          message.fail(getFailureCode(e), e.getMessage());
         }
       });
     super.start();
   }
 
   private int getFailureCode(Throwable failure) {
+    log.error(failure.getMessage(), failure);
     if (failure instanceof NoSuchElementException || failure instanceof NullPointerException) {
       return HttpResponseStatus.NOT_FOUND.code();
     } else if (failure instanceof IllegalAccessException || failure instanceof IllegalFormatException) {

@@ -185,6 +185,11 @@ public class ServiceUtils {
   private static Object toReplyPayload(Object object) {
     if (object == null) {
       return StringUtils.EMPTY;
+    } else if (object.getClass().getName().equals(Optional.class.getName())) {
+      Optional<?> optional = (Optional<?>) object;
+      return optional
+        .map(ServiceUtils::toReplyPayload)
+        .orElse(StringUtils.EMPTY);
     } else if (isEntity(object.getClass()) || isDTO(object.getClass())) {
       return JsonObject.mapFrom(object);
     } else if (object.getClass().getName().equals(UUID.class.getName())) {
