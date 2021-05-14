@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import ph.com.nightowlstudios.entity.Column;
 import ph.com.nightowlstudios.entity.Entity;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,10 +71,39 @@ public class Collectors {
         }
         int pos = row.getColumnIndex(field.getDeclaredAnnotation(Column.class).value());
         if (pos >= 0) {
-          Try.of(() -> method.get().invoke(result, row.get(field.getType(), pos)));
+          Try.of(() -> method
+            .get()
+            .invoke(
+              result,
+              row.get(autoboxFieldType(field), pos))
+          );
         }
       });
     return result;
+  }
+
+  private static Class<?> autoboxFieldType(Field field) {
+    if (!field.getType().isPrimitive()) {
+      return field.getType();
+    }
+    String type = field.getType().getTypeName();
+    if (type.equals(byte.class.getTypeName())) {
+      return Byte.class;
+    } else if (type.equals(short.class.getTypeName())) {
+      return Short.class;
+    } else if (type.equals(int.class.getTypeName())) {
+      return Integer.class;
+    } else if (type.equals(long.class.getTypeName())) {
+      return Long.class;
+    } else if (type.equals(float.class.getTypeName())) {
+      return Float.class;
+    } else if (type.equals(double.class.getTypeName())) {
+      return Double.class;
+    } else if (type.equals(boolean.class.getTypeName())) {
+      return Boolean.class;
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   public static JsonObject fromRow(Row row, String... columnNames) {
