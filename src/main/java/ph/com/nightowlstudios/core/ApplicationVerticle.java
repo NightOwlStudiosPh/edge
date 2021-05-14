@@ -103,6 +103,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
 
   protected <T extends Service> void registerService(Class<T> service, DeploymentOptions options) {
     this.serviceVerticles.put(service, options);
+    Edge.registerService(service);
   }
 
   /**
