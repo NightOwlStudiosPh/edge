@@ -32,6 +32,10 @@ public interface Entity {
       .toArray(String[]::new);
   }
 
+  static <T extends Entity> String column(Class<T> entityClass, String column) {
+    return String.format("%s.%s", Entity.getTableName(entityClass), column);
+  }
+
   static <T extends Entity> JsonObject toJson(T entity) {
     return Utils.camelCaseKeys(JsonObject.mapFrom(entity));
   }

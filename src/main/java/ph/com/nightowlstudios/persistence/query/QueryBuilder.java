@@ -47,7 +47,8 @@ public class QueryBuilder {
     FULL_OUTER // "full outer join"
   }
 
-  private static final String WHITESPACE = " ";
+  static final String WHITESPACE = " ";
+  static final String COMMA = ",";
 
   private final Map<QueryType, Function<String, String>> buildFuncs;
   private final List<Object> values;
@@ -185,20 +186,40 @@ public class QueryBuilder {
     return this;
   }
 
+  public QueryBuilder innerJoin(JoinSelectQueryBuilder query, String asTable, String asColumn, String ontoColumn) {
+    return innerJoin(query.build(), asTable, asColumn, ontoColumn);
+  }
+
   public QueryBuilder innerJoin(String query, String asTable, String asColumn, String ontoColumn) {
     return join(Join.INNER, query, asTable, asColumn, ontoColumn);
+  }
+
+  public QueryBuilder fullJoin(JoinSelectQueryBuilder query, String asTable, String asColumn, String ontoColumn) {
+    return fullJoin(query.build(), asTable, asColumn, ontoColumn);
   }
 
   public QueryBuilder fullJoin(String query, String asTable, String asColumn, String ontoColumn) {
     return join(Join.FULL, query, asTable, asColumn, ontoColumn);
   }
 
+  public QueryBuilder fullOuterJoin(JoinSelectQueryBuilder query, String asTable, String asColumn, String ontoColumn) {
+    return fullOuterJoin(query.build(), asTable, asColumn, ontoColumn);
+  }
+
   public QueryBuilder fullOuterJoin(String query, String asTable, String asColumn, String ontoColumn) {
     return join(Join.FULL_OUTER, query, asTable, asColumn, ontoColumn);
   }
 
+  public QueryBuilder leftJoin(JoinSelectQueryBuilder query, String asTable, String asColumn, String ontoColumn) {
+    return leftJoin(query.build(), asTable, asColumn, ontoColumn);
+  }
+
   public QueryBuilder leftJoin(String query, String asTable, String asColumn, String ontoColumn) {
     return join(Join.LEFT, query, asTable, asColumn, ontoColumn);
+  }
+
+  public QueryBuilder rightJoin(JoinSelectQueryBuilder query, String asTable, String asColumn, String ontoColumn) {
+    return rightJoin(query.build(), asTable, asColumn, ontoColumn);
   }
 
   public QueryBuilder rightJoin(String query, String asTable, String asColumn, String ontoColumn) {
@@ -401,7 +422,7 @@ public class QueryBuilder {
 
   private String buildSelectSQL(String tableName) {
     String format = "%s %s FROM %s";
-    String columns = StringUtils.join(this.columns, ",");
+    String columns = StringUtils.join(this.columns, COMMA);
     return String.format(format, QueryType.SELECT, columns, tableName);
   }
 
@@ -433,7 +454,7 @@ public class QueryBuilder {
       format,
       QueryType.INSERT,
       tableName,
-      String.join(",", columns),
+      String.join(COMMA, columns),
       buildValuesForInsert(columns.length));
   }
 

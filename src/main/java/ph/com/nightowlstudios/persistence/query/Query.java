@@ -10,10 +10,6 @@ import java.util.UUID;
  * @since 9/12/20
  */
 public interface Query {
-  String sql();
-
-  Tuple tuple();
-
   static QueryBuilder select(String fromTable) {
     return QueryBuilder.select(fromTable);
   }
@@ -65,5 +61,13 @@ public interface Query {
   static <T extends Entity> Query delete(T entity) {
     return QueryBuilder.delete(entity);
   }
+
+  static <T extends Entity> JoinSelectQueryBuilder joinSelect(Class<T> entityClass) { return new JoinSelectQueryBuilder(entityClass); }
+
+  static JoinSelectQueryBuilder joinSelect(String tableName) { return new JoinSelectQueryBuilder(tableName); }
+
+  String sql();
+
+  Tuple tuple();
 }
 
