@@ -172,24 +172,28 @@ public class ServiceUtils {
   }
 
   static <T> JsonObject buildReplyPayload(T message) {
-    JsonObject payload = new JsonObject();
-    payload.put(PAYLOAD, toReplyPayload(message));
-    payload.put(TYPE, Optional
-      .ofNullable(message)
-      .map(m -> m.getClass().getName())
-      .orElse(NIL_TYPE)
+
+    if (message != null && message.getClass().getName().equals(Optional.class.getName())) {
+      Optional<?> optional = (Optional<?>) message;
+      return optional
+        .map(ServiceUtils::buildReplyPayload)
+        .orElse(new JsonObject()
+          .put(PAYLOAD, StringUtils.EMPTY)
+          .put(TYPE, NIL_TYPE)
+        );
+    }
+
+    return new JsonObject()
+      .put(PAYLOAD, toReplyPayload(message))
+      .put(TYPE, Optional.ofNullable(message)
+        .map(m -> m.getClass().getName())
+        .orElse(NIL_TYPE)
     );
-    return payload;
   }
 
   private static Object toReplyPayload(Object object) {
     if (object == null) {
       return StringUtils.EMPTY;
-    } else if (object.getClass().getName().equals(Optional.class.getName())) {
-      Optional<?> optional = (Optional<?>) object;
-      return optional
-        .map(ServiceUtils::toReplyPayload)
-        .orElse(StringUtils.EMPTY);
     } else if (isEntity(object.getClass()) || isDTO(object.getClass())) {
       return JsonObject.mapFrom(object);
     } else if (object.getClass().getName().equals(UUID.class.getName())) {
