@@ -39,6 +39,11 @@ public class QueryBuilder {
     DESC
   }
 
+  private enum SortNulls {
+    FIRST,
+    LAST
+  }
+
   private enum Join {
     INNER, // "inner join"
     LEFT, // "left join"
@@ -64,6 +69,7 @@ public class QueryBuilder {
 
   private String orderByColumn;
   private Sort sortBy = Sort.DESC;
+  private SortNulls sortNull = null;
   private String offset;
   private String limit;
 
@@ -274,6 +280,30 @@ public class QueryBuilder {
     return this;
   }
 
+  public QueryBuilder ascendingNullsFirst() {
+    this.sortBy = Sort.ASC;
+    this.sortNull = SortNulls.FIRST;
+    return this;
+  }
+
+  public QueryBuilder ascendingNullsLast() {
+    this.sortBy = Sort.ASC;
+    this.sortNull = SortNulls.LAST;
+    return this;
+  }
+
+  public QueryBuilder descendingNullsFirst() {
+    this.sortBy = Sort.DESC;
+    this.sortNull = SortNulls.FIRST;
+    return this;
+  }
+
+  public QueryBuilder descendingNullsLast() {
+    this.sortBy = Sort.DESC;
+    this.sortNull = SortNulls.LAST;
+    return this;
+  }
+
   public QueryBuilder offset(String offset) {
     this.offset = offset;
     return this;
@@ -368,8 +398,10 @@ public class QueryBuilder {
 
   private String buildOrderByClause () {
     if (StringUtils.isNotBlank(this.orderByColumn)) {
-      String sort = this.sortBy == Sort.ASC ? "ASC" : "DESC";
-      return String.format("ORDER BY %s %s", orderByColumn, sort);
+      String orderClause = String.format("ORDER BY %s %s", orderByColumn, this.sortBy.name().toUpperCase());
+      if (this.sortNull != null) {
+        return String.format("%s NULLS %s", orderClause, this.sortNull.name().toUpperCase());
+      }
     }
     return StringUtils.EMPTY;
   }

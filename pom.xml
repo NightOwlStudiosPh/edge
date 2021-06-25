@@ -6,7 +6,8 @@
 
     <groupId>ph.com.nightowlstudios</groupId>
     <artifactId>edge</artifactId>
-    <version>4.21.5-17</version>
+    <!--month.year.minor/day -->
+    <version>4.6.25</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>

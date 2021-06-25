@@ -163,7 +163,8 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
   }
 
   protected String apiPrefix() {
-    return config().getString("apiPrefix", "/api");
+    String prefix = config().getString("prefix", "api");
+    return String.format("/%s/%s", prefix.trim(), version().trim());
   }
 
   protected String webSocketPrefix() {
