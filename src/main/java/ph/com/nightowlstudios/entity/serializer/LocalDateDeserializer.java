@@ -24,10 +24,9 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
     @Override
     public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         try {
-            long epoch = Long.parseLong(p.getText());
-            return LocalDate.ofEpochDay(epoch);
-        } catch (NumberFormatException e) {
             return LocalDate.parse(p.getText());
+        } catch (NumberFormatException e) {
+            return LocalDate.parse(LocalDate.now().toString());
         }
     }
 }

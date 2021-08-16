@@ -23,7 +23,6 @@ public class LocalDateSerializer extends StdSerializer<LocalDate> {
 
     @Override
     public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        long epoch = value.toEpochDay();
-        gen.writeString(Long.toString(epoch));
+        gen.writeString(value.toString());
     }
 }
