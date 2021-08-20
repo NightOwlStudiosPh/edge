@@ -87,7 +87,7 @@ public abstract class Resource {
   }
 
   protected <T> T getAuthClaim(RoutingContext ctx, String key) {
-    return ctx.user().<T>get(key);
+    return ctx.user().get(key);
   }
 
   protected <T> T getAuthClaim(RoutingContext ctx, String key, T def) {
@@ -122,6 +122,14 @@ public abstract class Resource {
 
   protected Route put(String path, UserRole role) {
     return protectedRoute(HttpMethod.PUT, path, role);
+  }
+
+  protected Route patch(String path) {
+    return protectedRoute(HttpMethod.PATCH, path);
+  }
+
+  protected Route patch(String path, UserRole role) {
+    return protectedRoute(HttpMethod.PATCH, path, role);
   }
 
   protected Route post(String path) {
@@ -186,8 +194,9 @@ public abstract class Resource {
     }
 
     if (cause instanceof IllegalAccessException ||
-      cause instanceof IllegalAccessError ||
-      cause instanceof SecurityException) {
+            cause instanceof IllegalAccessError ||
+            cause instanceof IllegalStateException ||
+            cause instanceof SecurityException) {
       ctx.fail(HttpResponseStatus.FORBIDDEN.code(), cause);
       return;
     }
@@ -206,7 +215,7 @@ public abstract class Resource {
    * @return the same <code>list</code> for fluent use.
    */
   protected  <T, U> Future<List<T>> onEach(List<T> list, Function<T, Future<U>> execute) {
-    List<Future> futures = new ArrayList<>();
+    @SuppressWarnings("rawtypes") List<Future> futures = new ArrayList<>();
     list.forEach(item -> futures.add(execute.apply(item)));
 
     Promise<List<T>> promise = Promise.promise();
