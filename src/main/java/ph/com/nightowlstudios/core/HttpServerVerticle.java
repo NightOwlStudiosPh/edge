@@ -43,7 +43,7 @@ class HttpServerVerticle extends AbstractVerticle {
   private final Supplier<String> webSocketPrefix;
   private final Supplier<String> bannerText;
 
-  private final Consumer<Router> onRouterCreate;
+  private final Consumer<Router> onRouterCreated;
   private final Supplier<Handler<RoutingContext>> createRouteLogHandler;
   private final Supplier<Handler<RoutingContext>> createRouteFailHandler;
   private final Supplier<Class<Resource>[]> getResourceClasses;
@@ -60,7 +60,7 @@ class HttpServerVerticle extends AbstractVerticle {
           Supplier<Set<String>> allowedHeaders,
           Supplier<Set<String>> exposedHeaders,
           Supplier<String> apiPrefix,
-          Consumer<Router> onRouterCreate,
+          Consumer<Router> onRouterCreated,
           Supplier<Handler<RoutingContext>> createRouteLogHandler,
           Supplier<Handler<RoutingContext>> createRouteFailHandler,
           Supplier<Class<Resource>[]> getResourceClasses,
@@ -76,7 +76,7 @@ class HttpServerVerticle extends AbstractVerticle {
     this.allowedHeaders = allowedHeaders;
     this.exposedHeaders = exposedHeaders;
     this.apiPrefix = apiPrefix;
-    this.onRouterCreate = onRouterCreate;
+    this.onRouterCreated = onRouterCreated;
     this.createRouteLogHandler = createRouteLogHandler;
     this.createRouteFailHandler = createRouteFailHandler;
     this.getResourceClasses = getResourceClasses;
@@ -113,7 +113,7 @@ class HttpServerVerticle extends AbstractVerticle {
     );
     rootRouter.route().handler(BodyHandler.create());
 
-    this.onRouterCreate.accept(rootRouter);
+    this.onRouterCreated.accept(rootRouter);
 
     rootRouter.mountSubRouter(apiPrefix.get(), createApiRouter());
     rootRouter.mountSubRouter(webSocketPrefix.get(), createWebSocketRouter.apply(vertx));

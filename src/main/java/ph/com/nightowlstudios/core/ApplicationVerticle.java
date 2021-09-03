@@ -36,7 +36,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
             this::allowedHeaders,
             this::exposedHeaders,
             this::apiPrefix,
-            this::onRouterCreate,
+            this::onRouterCreated,
             this::createRouteLogHandler,
             this::createRouteFailureHandler,
             this::getResourceClasses,
@@ -108,11 +108,11 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
   }
 
   /**
-   * Called immediately after Router creation.
+   * Called after initializing and setting up the root router.
    *
    * @param router the root router
    */
-  protected void onRouterCreate(Router router) {
+  protected void onRouterCreated(Router router) {
   }
 
   /**
