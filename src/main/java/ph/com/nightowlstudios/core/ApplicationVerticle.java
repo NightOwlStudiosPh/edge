@@ -31,21 +31,21 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
   public ApplicationVerticle() {
     this.serviceVerticles = new HashMap<>();
     this.serverVerticle = new HttpServerVerticle(
-      this::allowCORSCredentials,
-      this::allowedMethods,
-      this::allowedHeaders,
-      this::exposedHeaders,
-      this::apiPrefix,
-      this::beforeRouterCreate,
-      this::createRouteLogHandler,
-      this::createRouteFailureHandler,
-      this::getResourceClasses,
-      this::setupRoutes,
-      this::webSocketPrefix,
-      this::createWebSocketRouter,
-      this::bannerText,
-      this::onStart,
-      this::onStartFail
+            this::allowCORSCredentials,
+            this::allowedMethods,
+            this::allowedHeaders,
+            this::exposedHeaders,
+            this::apiPrefix,
+            this::beforeRouterCreate,
+            this::createRouteLogHandler,
+            this::createRouteFailureHandler,
+            this::getResourceClasses,
+            this::setupRoutes,
+            this::webSocketRoute,
+            this::createWebSocketRouter,
+            this::bannerText,
+            this::onStart,
+            this::onStartFail
     );
   }
 
@@ -167,8 +167,16 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
     return String.format("/%s/%s", prefix.trim(), version().trim());
   }
 
-  protected String webSocketPrefix() {
-    return config().getString("wsPrefix", "/ws");
+  protected String webSocketRoute() {
+    return getWebSocketConfig().getString("route");
+  }
+
+  protected JsonObject getWebSocketConfig() {
+    JsonObject defaultConfig = new JsonObject()
+            .put("route", "/ws/*")
+            .put("inbound", "in*")
+            .put("outbound", "out*");
+    return config().getJsonObject("ws", defaultConfig);
   }
 
   protected String bannerText() {

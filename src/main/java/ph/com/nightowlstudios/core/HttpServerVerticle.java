@@ -55,21 +55,21 @@ class HttpServerVerticle extends AbstractVerticle {
 
 
   HttpServerVerticle(
-    Supplier<Boolean> allowCORSCredentials,
-    Supplier<Set<HttpMethod>> allowedMethods,
-    Supplier<Set<String>> allowedHeaders,
-    Supplier<Set<String>> exposedHeaders,
-    Supplier<String> apiPrefix,
-    Consumer<Router> onRouteCreate,
-    Supplier<Handler<RoutingContext>> createRouteLogHandler,
-    Supplier<Handler<RoutingContext>> createRouteFailHandler,
-    Supplier<Class<Resource>[]> getResourceClasses,
-    Consumer<Router> setupRoutes,
-    Supplier<String> webSocketPrefix,
-    Function<Vertx, Router> createWebSocketRouter,
-    Supplier<String> bannerText,
-    Consumer<HttpServer> onStart,
-    Consumer<Throwable> onStartFail
+          Supplier<Boolean> allowCORSCredentials,
+          Supplier<Set<HttpMethod>> allowedMethods,
+          Supplier<Set<String>> allowedHeaders,
+          Supplier<Set<String>> exposedHeaders,
+          Supplier<String> apiPrefix,
+          Consumer<Router> onRouteCreate,
+          Supplier<Handler<RoutingContext>> createRouteLogHandler,
+          Supplier<Handler<RoutingContext>> createRouteFailHandler,
+          Supplier<Class<Resource>[]> getResourceClasses,
+          Consumer<Router> setupRoutes,
+          Supplier<String> webSocketRoute,
+          Function<Vertx, Router> createWebSocketRouter,
+          Supplier<String> bannerText,
+          Consumer<HttpServer> onStart,
+          Consumer<Throwable> onStartFail
   ) {
     this.allowCORSCredentials = allowCORSCredentials;
     this.allowedMethods = allowedMethods;
@@ -81,7 +81,7 @@ class HttpServerVerticle extends AbstractVerticle {
     this.createRouteFailHandler = createRouteFailHandler;
     this.getResourceClasses = getResourceClasses;
     this.setupRoutes = setupRoutes;
-    this.webSocketPrefix = webSocketPrefix;
+    this.webSocketPrefix = webSocketRoute;
     this.createWebSocketRouter = createWebSocketRouter;
     this.bannerText = bannerText;
     this.onStart = onStart;
