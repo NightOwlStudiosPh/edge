@@ -36,7 +36,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
             this::allowedHeaders,
             this::exposedHeaders,
             this::apiPrefix,
-            this::beforeRouterCreate,
+            this::onRouterCreate,
             this::createRouteLogHandler,
             this::createRouteFailureHandler,
             this::getResourceClasses,
@@ -70,6 +70,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
    */
   public abstract void setup();
 
+  @SuppressWarnings("rawtypes")
   private List<Future> buildDeployList() {
     List<Future> list = new ArrayList<>();
     this.serviceVerticles.forEach((service, options) -> list.add(createLauncher(service, options)));
@@ -111,7 +112,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
    *
    * @param router the root router
    */
-  protected void beforeRouterCreate(Router router) {
+  protected void onRouterCreate(Router router) {
   }
 
   /**
@@ -173,7 +174,7 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
 
   protected JsonObject getWebSocketConfig() {
     JsonObject defaultConfig = new JsonObject()
-            .put("route", "/ws/*")
+            .put("route", "/ws")
             .put("inbound", "in*")
             .put("outbound", "out*");
     return config().getJsonObject("ws", defaultConfig);
@@ -191,7 +192,6 @@ public abstract class ApplicationVerticle extends AbstractVerticle {
     return ErrorHandler.create(getVertx());
   }
 
-  @SuppressWarnings("unchecked")
   protected abstract <R extends Resource> Class<R>[] getResourceClasses();
 
   private Router createWebSocketRouter(Vertx vertx) throws RuntimeException {

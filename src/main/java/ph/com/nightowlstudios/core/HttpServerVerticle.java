@@ -43,7 +43,7 @@ class HttpServerVerticle extends AbstractVerticle {
   private final Supplier<String> webSocketPrefix;
   private final Supplier<String> bannerText;
 
-  private final Consumer<Router> beforeRouteCreate;
+  private final Consumer<Router> onRouterCreate;
   private final Supplier<Handler<RoutingContext>> createRouteLogHandler;
   private final Supplier<Handler<RoutingContext>> createRouteFailHandler;
   private final Supplier<Class<Resource>[]> getResourceClasses;
@@ -60,7 +60,7 @@ class HttpServerVerticle extends AbstractVerticle {
           Supplier<Set<String>> allowedHeaders,
           Supplier<Set<String>> exposedHeaders,
           Supplier<String> apiPrefix,
-          Consumer<Router> onRouteCreate,
+          Consumer<Router> onRouterCreate,
           Supplier<Handler<RoutingContext>> createRouteLogHandler,
           Supplier<Handler<RoutingContext>> createRouteFailHandler,
           Supplier<Class<Resource>[]> getResourceClasses,
@@ -76,7 +76,7 @@ class HttpServerVerticle extends AbstractVerticle {
     this.allowedHeaders = allowedHeaders;
     this.exposedHeaders = exposedHeaders;
     this.apiPrefix = apiPrefix;
-    this.beforeRouteCreate = onRouteCreate;
+    this.onRouterCreate = onRouterCreate;
     this.createRouteLogHandler = createRouteLogHandler;
     this.createRouteFailHandler = createRouteFailHandler;
     this.getResourceClasses = getResourceClasses;
@@ -101,35 +101,37 @@ class HttpServerVerticle extends AbstractVerticle {
   }
 
   @Override
-  public void start(Promise<Void> startPromise) throws Exception {
+  public void start(Promise<Void> startPromise) {
     Router rootRouter = Router.router(vertx);
-    this.beforeRouteCreate.accept(rootRouter);
     rootRouter.route().handler(
-      CorsHandler
-        .create(getAllowedOrigins())
-        .allowCredentials(allowCORSCredentials.get())
-        .allowedMethods(allowedMethods.get())
-        .allowedHeaders(allowedHeaders.get())
-        .exposedHeaders(exposedHeaders.get())
+            CorsHandler
+                    .create(getAllowedOrigins())
+                    .allowCredentials(allowCORSCredentials.get())
+                    .allowedMethods(allowedMethods.get())
+                    .allowedHeaders(allowedHeaders.get())
+                    .exposedHeaders(exposedHeaders.get())
     );
     rootRouter.route().handler(BodyHandler.create());
+
+    this.onRouterCreate.accept(rootRouter);
+
     rootRouter.mountSubRouter(apiPrefix.get(), createApiRouter());
     rootRouter.mountSubRouter(webSocketPrefix.get(), createWebSocketRouter.apply(vertx));
 
     createHttpServer()
-      .requestHandler(rootRouter)
-      .listen(getPort(), http -> {
-        if (http.succeeded()) {
-          startPromise.complete();
-          log.info(bannerText.get());
-          log.info("{} online at PORT: {}", appName(), http.result().actualPort());
-          onStart.accept(http.result());
-          return;
-        }
-        log.error("Error running server: " + http.cause());
-        startPromise.fail(http.cause());
-        onStartFail.accept(http.cause());
-      });
+            .requestHandler(rootRouter)
+            .listen(getPort(), http -> {
+              if (http.succeeded()) {
+                startPromise.complete();
+                log.info(bannerText.get());
+                log.info("{} online at PORT: {}", appName(), http.result().actualPort());
+                onStart.accept(http.result());
+                return;
+              }
+              log.error("Error running server: " + http.cause());
+              startPromise.fail(http.cause());
+              onStartFail.accept(http.cause());
+            });
   }
 
   private Router createApiRouter() throws RuntimeException {
