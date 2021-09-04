@@ -1,11 +1,9 @@
 package ph.com.nightowlstudios.entity;
 
-import io.vavr.control.Try;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import ph.com.nightowlstudios.utils.Utils;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
@@ -26,10 +24,19 @@ public interface Entity {
 
   static <T extends Entity> String[] getColumns(Class<T> clasz) {
     return Arrays
-      .stream(clasz.getDeclaredFields())
-      .filter(field -> field.isAnnotationPresent(Column.class))
-      .map(field -> field.getDeclaredAnnotation(Column.class).value())
-      .toArray(String[]::new);
+            .stream(clasz.getDeclaredFields())
+            .filter(field -> field.isAnnotationPresent(Column.class))
+            .map(field -> field.getDeclaredAnnotation(Column.class).value())
+            .toArray(String[]::new);
+  }
+
+  static <T extends Entity> String[] getColumnsWithoutId(Class<T> clasz) {
+    return Arrays
+            .stream(clasz.getDeclaredFields())
+            .filter(field -> field.isAnnotationPresent(Column.class))
+            .filter(field -> !StringUtils.equals(field.getName(), "id"))
+            .map(field -> field.getDeclaredAnnotation(Column.class).value())
+            .toArray(String[]::new);
   }
 
   static <T extends Entity> String column(Class<T> entityClass, String column) {

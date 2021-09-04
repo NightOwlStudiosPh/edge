@@ -427,8 +427,11 @@ public class QueryBuilder {
 
   public static <T extends Entity> Query insert(T entity) {
     return new QueryImpl(
-      buildInsertSQL(Entity.getTableName(entity.getClass()), Entity.getColumns(entity.getClass())),
-      toTuple(entity));
+            buildInsertSQL(
+                    Entity.getTableName(entity.getClass()),
+                    Entity.getColumnsWithoutId(entity.getClass())
+            ),
+            toTupleWithoutId(entity));
   }
 
   public static <T extends Entity> Query update(T entity) {
@@ -507,25 +510,40 @@ public class QueryBuilder {
       .mapToObj(i -> {
         OperatorEntry e = this.ops.get(i - 1);
         return String.format(
-          "%s %s%s$%d",
-          e.getLogicOp(),
-          e.getColumn(),
-          e.getOperator(),
-          i + startIndex);
+                "%s %s%s$%d",
+                e.getLogicOp(),
+                e.getColumn(),
+                e.getOperator(),
+                i + startIndex);
       })
-      .collect(Collectors.joining(" "));
+            .collect(Collectors.joining(" "));
     return String.format("WHERE %s%s$%d %s", this.whereColumn, this.whereOp, startIndex, logicals).trim();
+  }
+
+  private static <T extends Entity> Tuple toTupleWithoutId(T entity) {
+    return Tuple.tuple(Arrays
+            .stream(entity.getClass().getDeclaredFields())
+            .filter(field -> field.isAnnotationPresent(Column.class))
+            .filter(field -> !StringUtils.equals(field.getName(), "id"))
+            .map(field -> {
+              final String prefix = field.getType().equals(boolean.class) ? "is" : "get";
+              return Try.of(() -> entity.getClass()
+                              .getDeclaredMethod(prefix + StringUtils.capitalize(field.getName()))
+                              .invoke(entity))
+                      .getOrNull();
+            })
+            .collect(Collectors.toList()));
   }
 
   private static <T extends Entity> Tuple toTuple(T entity) {
     return Tuple.tuple(Arrays
-      .stream(entity.getClass().getDeclaredFields())
-      .filter(field -> field.isAnnotationPresent(Column.class))
-      .map(field -> {
-        final String prefix = field.getType().equals(boolean.class) ? "is" : "get";
-        return Try.of(() -> entity.getClass()
-          .getDeclaredMethod(prefix + StringUtils.capitalize(field.getName()))
-          .invoke(entity))
+            .stream(entity.getClass().getDeclaredFields())
+            .filter(field -> field.isAnnotationPresent(Column.class))
+            .map(field -> {
+              final String prefix = field.getType().equals(boolean.class) ? "is" : "get";
+              return Try.of(() -> entity.getClass()
+                              .getDeclaredMethod(prefix + StringUtils.capitalize(field.getName()))
+                              .invoke(entity))
           .getOrNull();
       })
       .collect(Collectors.toList()));

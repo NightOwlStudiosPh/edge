@@ -40,7 +40,7 @@ class HttpServerVerticle extends AbstractVerticle {
   private final Supplier<Set<String>> allowedHeaders;
   private final Supplier<Set<String>> exposedHeaders;
   private final Supplier<String> apiPrefix;
-  private final Supplier<String> webSocketPrefix;
+  private final Supplier<String> webSocketRoute;
   private final Supplier<String> bannerText;
 
   private final Consumer<Router> onRouterCreated;
@@ -81,7 +81,7 @@ class HttpServerVerticle extends AbstractVerticle {
     this.createRouteFailHandler = createRouteFailHandler;
     this.getResourceClasses = getResourceClasses;
     this.setupRoutes = setupRoutes;
-    this.webSocketPrefix = webSocketRoute;
+    this.webSocketRoute = webSocketRoute;
     this.createWebSocketRouter = createWebSocketRouter;
     this.bannerText = bannerText;
     this.onStart = onStart;
@@ -116,7 +116,7 @@ class HttpServerVerticle extends AbstractVerticle {
     this.onRouterCreated.accept(rootRouter);
 
     rootRouter.mountSubRouter(apiPrefix.get(), createApiRouter());
-    rootRouter.mountSubRouter(webSocketPrefix.get(), createWebSocketRouter.apply(vertx));
+    rootRouter.mountSubRouter(webSocketRoute.get(), createWebSocketRouter.apply(vertx));
 
     createHttpServer()
             .requestHandler(rootRouter)
