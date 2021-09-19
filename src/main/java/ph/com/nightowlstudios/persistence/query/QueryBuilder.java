@@ -484,7 +484,7 @@ public class QueryBuilder {
   }
 
   private static String buildInsertSQL(String tableName, String... columns) {
-    String format = "%s INTO %s (%s) VALUES (%s)";
+    String format = "%s INTO %s (%s) VALUES (%s) RETURNING (id)";
     return String.format(
       format,
       QueryType.INSERT,
